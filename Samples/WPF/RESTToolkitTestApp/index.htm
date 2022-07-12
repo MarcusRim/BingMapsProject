@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <meta charset="utf-8" http-equiv="X-UA-Compatible" content="IE=edge" />
+	<script type='text/javascript' src='http://www.bing.com/api/maps/mapcontrol?callback=GetMap&key={bingmapskey}' async defer></script>
+	<script type='text/javascript'>
+        var map, infobox;
+        var centerlattitude = 34.2;
+        var centerlongitude = -117.8;
+        function GetMap() {
+            var center = new Microsoft.Maps.Location(centerlattitude, centerlongitude);
+            map = new Microsoft.Maps.Map('#myMap', { center: center, zoom: 20 });
+        }
+        function SetCoords(lat, long) {
+            centerlattitude = lat;
+            centerlongitude = long;
+            GetMap();
+        }
+
+        function GetDataOfLocation(lat, long, name, duplicate) {
+            CreatePushpin(lat, long, name, duplicate);
+        }
+
+        function CreatePushpin(lat, long, name, duplicate) {
+            //create pushpin: green for unique coordinates, red for duplicate coordinates
+            var pushpin1 = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(centerlattitude, centerlongitude))
+            if (duplicate == 1)
+                pushpin1 = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat + Math.random() / 10000 - 0.00005, long + Math.random() / 10000 - 0.00005), { color: 'red' });
+            else {
+                pushpin1 = new Microsoft.Maps.Pushpin(new Microsoft.Maps.Location(lat, long), { color: 'green' });
+            }
+            pushpin1.metadata = {
+                title: name
+            }
+            map.entities.push(pushpin1);
+
+            //Displays info about company
+            infobox = new Microsoft.Maps.Infobox(map.getCenter(), { visible: false });
+            infobox.setMap(map);
+
+            //Add mouse events to the pushpin.
+            Microsoft.Maps.Events.addHandler(pushpin1, 'mouseover', pinClicked);
+        }
+
+        function pinClicked(e) {
+            if (e.target.metadata) {
+                infobox.setOptions({
+                    location: e.target.getLocation(),
+                    title: e.target.metadata.title,
+                    visible: true
+                })
+            }
+        }
+
+        function highlight(id) {
+            //Highlight the mouse event div to indicate that the event has fired.
+            document.getElementById(id).style.background = 'LightGreen';
+            setTimeout(function () { document.getElementById(id).style.background = 'white'; }, 1000);
+        }
+    </script>
+    
+</head>
+<body>
+    <div id="redgreeninfo" style="margin:10px 0px 10px 0px">Red pins share the same coordinates as 1 or more pins, so they have been randomly moved a little bit</div>
+    <div id="refreshinfo" style="margin:10px 0px 10px 0px">If red pins are still too close together, press Open Map again</div>
+    <div id="myMap" style="position:relative;width:800px;height:600px;"></div>
+</body>
+</html>
